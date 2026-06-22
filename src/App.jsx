@@ -23,6 +23,7 @@ export default function App() {
   const [copiedFeedback, setCopiedFeedback] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const generatedUrlRef = useRef('')
+  const displayImgRef = useRef(null)
 
   function addToGallery(url) {
     if (!url) return
@@ -117,6 +118,28 @@ export default function App() {
   }
 
   async function handleDownload() {
+    const img = displayImgRef.current
+    if (img && img.complete && img.naturalWidth > 0) {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg'))
+        if (blob) {
+          const blobUrl = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = blobUrl
+          a.download = 'cat-meme-' + Date.now() + '.jpg'
+          a.click()
+          URL.revokeObjectURL(blobUrl)
+          return
+        }
+      } catch {
+        // fall through to fetch fallback
+      }
+    }
     await downloadMeme(imageUrl)
   }
 
@@ -147,7 +170,7 @@ export default function App() {
           onTagToggle={handleTagToggle}
         />
         <section>
-          <MemeDisplay imageUrl={imageUrl} />
+          <MemeDisplay imageUrl={imageUrl} imgRef={displayImgRef} />
           <div className="image-actions">
             <button className="btn btn-small btn-outline" onClick={handleCopyUrl}>
               📋 Copiar URL

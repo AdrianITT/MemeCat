@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export default function MemeDisplay({ imageUrl }) {
+export default function MemeDisplay({ imageUrl, imgRef }) {
   const [status, setStatus] = useState('empty')
 
   useEffect(() => {
@@ -39,8 +39,10 @@ export default function MemeDisplay({ imageUrl }) {
 
       {imageUrl && (
         <img
+          ref={imgRef}
           src={imageUrl}
           alt="Cat meme"
+          crossOrigin="anonymous"
           onLoad={handleImageLoad}
           onError={handleImageError}
           style={{ display: status === 'loaded' ? 'block' : 'none' }}
